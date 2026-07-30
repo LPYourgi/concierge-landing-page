@@ -68,13 +68,13 @@ Base rates (⚠️ confirm set + fee-rounding with Kai before building — see �
 
 ## 8. Technical
 - **Platform:** Webflow (default; copy an existing landing page as a starting point). Vibe coding with Claude encouraged.
-- **Form destination:** ⚠️ **Main open unknown — blocks build.** Options: SendBlue API, Webflow form, Power Automate → Teams channel (Jeff's instinct, simplest), or a shared concierge inbox. Kai decides; Jeff to determine.
+- **Form destination:** Wired as of 2026-07-30 to Power Automate → Teams channel (Jeff's instinct, simplest) as a stopgap. ⚠️ Still needs Kai's sign-off as the permanent destination; the webhook URL is currently hardcoded client-side with no auth, which should be revisited before real ad traffic hits the page.
 - **Downstream booking:** ⚠️ Jeff to define how concierge creates the booking, including making an account for account-less customers and "masquerading" into it.
 - **Publishing:** heads-up to Paul & Mike before publishing; Lauren/Alex publish to staging regularly, so no obvious conflict — flag anyway. Lauren still needs Webflow access (Chris → Carlos).
 - **Longer term:** move off the Webflow MCP toward Storyblok so the site can be fully coded (out of scope for this test).
 
 ## 9. Open items before build
-1. Form destination + owner of that pipe (Kai / Jeff) — **blocks build.**
+1. Form destination + owner of that pipe (Kai / Jeff) — wired to Power Automate → Teams as a stopgap 2026-07-30; still needs Kai's sign-off + a non-hardcoded webhook before real traffic.
 2. Correct rate set + whether prices are fee-inclusive (Kai).
 3. Customer response-time SLA (Chris → Kai).
 4. Booking creation for account-less customers (Jeff).

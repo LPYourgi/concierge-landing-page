@@ -10,7 +10,7 @@
   PROTOTYPE NOTES:
   - Font: Oswald + Archivo stand in for National 2 (licensed) — swap in production.
   - Rates ($50 / $50 / $40 / $20) and the "within an hour, 8am-8pm" SLA are PLACEHOLDERS pending Kai.
-  - No real form backend — submission is simulated; destination TBD.
+  - Booking submissions POST to a Power Automate webhook that posts into the concierge team's Teams channel (Booking Form). No confirmation is read back (no-cors) — submission failures fail silently.
   - Guarantee wording is light and needs legal review before publish.
 -->
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -232,8 +232,9 @@
           <span style="font-size:14px; color:#555;">Estimated total</span>
           <span class="total-num" id="total" aria-live="polite">$210</span>
         </div>
-        <p class="fineprint" id="breakdown" style="margin:-6px 0 14px;">2 nights × 2 pets × $50 + 5% service fee</p>
+        <p class="fineprint" id="breakdown" style="margin:-8px 0 26px;">2 nights × 2 pets × $50 + 5% service fee</p>
 
+        <p class="fineprint" style="text-align:center; margin-bottom:8px;">By submitting, you agree Yourgi may text you about this request. Message and data rates may apply.</p>
         <button class="btn-dark" style="width:100%;" id="to-details">Find my pro</button>
         <p class="fineprint" style="text-align:center; margin-top:8px;">Coupons don't apply to this flat-rate offer.</p>
       </div>
@@ -451,6 +452,25 @@
   var MARKETS=['80','75','76','77','021','022','970','971','972'];
   function inMarket(zip){return MARKETS.some(function(p){return zip.indexOf(p)===0;});}
 
+  /* Sends the booking request to the concierge team's Teams channel via a Power Automate webhook. */
+  var CONCIERGE_WEBHOOK_URL='https://defaulta51d2d87ec284f03835d3475f2c08b.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/fc82e4f50a154976b9b63535c197f70c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ugY6yDOJ0N_viN7zGjmBeRXNt3afWyonz8aSq__WmkQ';
+  function submitBooking(){
+    var payload={
+      service:state.svc,
+      startDate:$('q-start').value,
+      endDate:$('q-end').value,
+      quantity:qty(),
+      unit:state.unit,
+      pets:state.pets,
+      zip:$('q-zip').value,
+      phone:$('q-phone').value,
+      estimatedTotal:totalOf(),
+      submittedAt:new Date().toISOString()
+    };
+    /* no-cors: Power Automate's webhook doesn't send CORS headers, so the response is opaque and unreadable — this is fire-and-forget. */
+    fetch(CONCIERGE_WEBHOOK_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(function(){});
+  }
+
   function show(id){['step-quote','step-confirm','step-oom'].forEach(function(s){$(s).classList.add('hidden');});$(id).classList.remove('hidden');}
 
   function validPhone(v){var d=v.replace(/\D/g,'');if(d.length===11&&d[0]==='1')d=d.slice(1);return /^[2-9]\d{2}[2-9]\d{6}$/.test(d);}
@@ -482,6 +502,7 @@
     else{zip.classList.remove('err');$('e-zip').style.display='none';}
     if(!ok)return;
     if(!inMarket(zip.value)){show('step-oom');return;}
+    submitBooking();
     $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+qty()+' '+state.unit+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right pro.';
     show('step-confirm');
   };

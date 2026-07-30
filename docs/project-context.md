@@ -38,7 +38,7 @@ The stated test question is whether customers will accept the flat-rate, concier
 
 **Accessibility:** Not defined in source material (logged in Gaps).
 
-**Technical:** Webflow is the default (not mandatory for a standalone page); easiest path is copying an existing landing page as a starting point. Vibe coding with Claude is encouraged. A footer with standard content is likely wanted. Concierge texts customers via SendBlue. Where form submissions land is the main open technical unknown — options raised are the SendBlue API, a Webflow form, Power Automate → a Teams channel (Jeff's instinct, simplest), or a shared concierge inbox; Kai decides. Downstream, Jeff owns how the booking actually gets created, including creating an account for account-less customers and concierge "masquerading" into it. Longer-term wish: move off the Webflow MCP (called janky; a 2.0 shipped but is untested) toward Storyblok so the site can be fully coded.
+**Technical:** Webflow is the default (not mandatory for a standalone page); easiest path is copying an existing landing page as a starting point. Vibe coding with Claude is encouraged. A footer with standard content is likely wanted. Concierge texts customers via SendBlue. Where form submissions land was the main open technical unknown; as of 2026-07-30 it's wired to Power Automate → a Teams channel (Jeff's instinct, simplest) as a stopgap — Kai still needs to sign off on it as the permanent destination, and the webhook URL is currently hardcoded client-side with no auth, which should be addressed before real ad traffic. Downstream, Jeff owns how the booking actually gets created, including creating an account for account-less customers and concierge "masquerading" into it. Longer-term wish: move off the Webflow MCP (called janky; a 2.0 shipped but is untested) toward Storyblok so the site can be fully coded.
 
 **Brand:** Follows the yourgi-brand skill. Must match the brand style guide; Lauren has Figma access.
 
@@ -47,7 +47,7 @@ The stated test question is whether customers will accept the flat-rate, concier
 **Other:** Timeline is end of week / Friday. Standard footer content expected.
 
 ## 7. Open Questions
-1. **Where do form submissions land, and who owns that pipe?** Options raised: SendBlue API, a Webflow form, Power Automate → Teams channel (Jeff's instinct), or a shared concierge inbox. Kai decides since he manages the concierge team; Jeff to determine — this blocks the build.
+1. **Where do form submissions land, and who owns that pipe?** Wired as of 2026-07-30 to Power Automate → Teams channel (Jeff's instinct) as a stopgap. Kai still needs to confirm this as the permanent destination since he manages the concierge team, and the hardcoded/unauthenticated webhook URL should be revisited before real traffic.
 2. **Are displayed prices fee-inclusive, and which rate set is correct?** Either $50 / $40 / $20 (base) or $50 / $44 / $24 (base + 5% fee) — possibly a transcription artifact. Tied to whether the 5% fee is rounded into the displayed price. Confirm with Kai before building.
 3. **What response-time commitment do we make to the customer?** Concierge is staffed through typical US business hours; realistic turnaround is an hour or two, but a 3 AM submission waits. Chris to confirm the SLA with Kai; copy must set the expectation explicitly.
 4. **How does concierge create a booking for a customer with no account?** An account may need creating, then concierge masquerades into it. Jeff to think through the downstream flow.

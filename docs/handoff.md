@@ -14,7 +14,7 @@ Target page: something like `yourgi.com/find-me-a-sitter`, separate from the hom
 
 ## Current status
 
-Interactive HTML prototype is **built, tested, and on-brand**, and the matching Quote flow is in Figma. It is **not** production and has **no backend** — form submissions don't go anywhere yet. Several values are deliberate placeholders pending Kai/legal (see "Open items" below). Think of it as a clickable, reviewable spec — not a finished page.
+Interactive HTML prototype is **built, tested, and on-brand**, and the matching Quote flow is in Figma. It is **not** production. As of 2026-07-30, submissions POST to a Power Automate webhook into the concierge team's Teams channel (fire-and-forget, no confirmation read back) — a working stopgap, not a confirmed permanent destination. Several values are deliberate placeholders pending Kai/legal (see "Open items" below). Think of it as a clickable, reviewable spec — not a finished page.
 
 ## Where everything lives
 
@@ -22,6 +22,7 @@ Interactive HTML prototype is **built, tested, and on-brand**, and the matching 
 Concierge Landing Page/
 ├── README.md                  ← folder index
 ├── find-me-a-sitter.html      ← THE prototype (canonical, icon service options). Double-click to open.
+├── index.html                 ← identical copy for GitHub Pages (serves from repo root)
 ├── deploy/
 │   └── index.html             ← identical copy named index.html, ready to drop into a static host
 └── docs/
@@ -55,13 +56,13 @@ It's a single self-contained file — all CSS and JS are inline. The logic was p
 | 1 | Correct rate set — **$50/$40/$20** vs **$50/$44/$24** — and whether the 5% fee is rounded into the displayed price | Kai |
 | 2 | Customer response-time commitment (prototype shows a placeholder "within an hour, 8am–8pm MT") | Chris → Kai |
 | 3 | Yourgi Guarantee wording — legal boundaries undocumented; current copy is light and flagged | Legal / Kai |
-| 4 | Where form submissions land (SendBlue / Webflow form / Power Automate→Teams / shared inbox) — **blocks a real build** | Kai / Jeff |
+| 4 | Where form submissions land — wired to Power Automate → Teams channel as of 2026-07-30 (Jeff's suggested option, simplest); still needs Kai's sign-off as the permanent destination. Note: the webhook URL is hardcoded client-side and unauthenticated — anyone who views source can POST to it, so this should be revisited before the page carries real ad traffic | Kai / Jeff |
 | 5 | Phone-only contact (email was removed) — confirm a mistyped phone with no email backup is acceptable | Lauren / Kai |
 | 6 | National 2 font + official logo lockup — prototype uses Oswald/Archivo stand-ins and the CDN logo | Webflow team / brand |
 
 ## How to edit
 
-- **Prototype:** open `find-me-a-sitter.html` in any code editor. It's plain HTML/CSS/JS, no build step. Keep the `deploy/index.html` copy in sync if you change the canonical file.
+- **Prototype:** open `find-me-a-sitter.html` in any code editor. It's plain HTML/CSS/JS, no build step. Keep both the `deploy/index.html` copy and the root `index.html` (GitHub Pages) in sync if you change the canonical file.
 - **Design:** edit in the Figma file above. Ask Lauren to add you with edit access.
 - **Copy / brand:** run anything customer-facing through the `yourgi-brand` skill; keep placeholders labeled until Kai/legal confirm.
 
