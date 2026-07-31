@@ -10,7 +10,7 @@ Read this first. It's the one doc that gets you oriented; the others (`project-c
 
 A standalone, flat-rate concierge landing page — a deliberately "fake front end" (Chris's word: *Potemkin*). The visitor picks a service, gets an upfront flat price, and submits a request; a real person on the concierge team follows up by text and books it manually. There's no platform integration behind it. The whole point is a cheap test of one question: **will customers accept a flat-rate, "we'll find the pro for you" model for pet care?**
 
-Target page: something like `yourgi.com/offers/best-care-guarantee` (renamed from `find-a-pro` on 2026-07-31), separate from the homepage. Original timeline was end of week.
+Target page: something like `yourgi.com/book/best-care-guarantee` (renamed from `find-a-pro` on 2026-07-31), separate from the homepage. Original timeline was end of week.
 
 ## Current status
 

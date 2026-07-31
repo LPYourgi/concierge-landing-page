@@ -11,7 +11,7 @@ A single, standalone Webflow landing page (a deliberately "Potemkin" front end) 
 
 ## 2. Goals / Non-goals
 **Goals**
-- Ship a quote-first landing page at a URL like `yourgi.com/offers/best-care-guarantee` by Friday.
+- Ship a quote-first landing page at a URL like `yourgi.com/book/best-care-guarantee` by Friday.
 - Capture qualified requests with enough info for concierge to follow up and book.
 - Match the Yourgi brand style guide (follows the `yourgi-brand` skill).
 
