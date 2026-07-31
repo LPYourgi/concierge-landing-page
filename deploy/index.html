@@ -483,35 +483,41 @@
   /* Sends the booking request to the concierge team's Teams channel via a Power Automate webhook. */
   var CONCIERGE_WEBHOOK_URL='https://defaulta51d2d87ec284f03835d3475f2c08b.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/fc82e4f50a154976b9b63535c197f70c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ugY6yDOJ0N_viN7zGjmBeRXNt3afWyonz8aSq__WmkQ';
   function submitBooking(){
+    var q=qty(), total=totalOf();
+    var svcLabel=state.svc.charAt(0).toUpperCase()+state.svc.slice(1);
     var payload={
-      service:state.svc,
-      startDate:$('q-start').value,
-      endDate:$('q-end').value,
-      quantity:qty(),
-      unit:state.unit,
-      pets:state.pets,
-      zip:$('q-zip').value,
-      phone:$('q-phone').value,
-      email:$('q-email').value,
-      estimatedTotal:totalOf(),
-      submittedAt:new Date().toISOString()
+      type:'message',
+      attachments:[{
+        contentType:'application/vnd.microsoft.card.adaptive',
+        content:{
+          '$schema':'http://adaptivecards.io/schemas/adaptive-card.json',
+          type:'AdaptiveCard', version:'1.4',
+          body:[
+            {type:'TextBlock',text:'NEW PRO SERVICE REQUEST',weight:'Bolder',size:'Medium'},
+            {type:'TextBlock',text:svcLabel+' in '+$('q-zip').value+' at flat rate $'+total.toLocaleString()+' - respond via SendBlue',isSubtle:true,spacing:'None',wrap:true},
+            {type:'FactSet',facts:[
+              {title:'Service',value:svcLabel},
+              {title:'Quoted',value:'$'+total.toLocaleString()+' ('+q+' '+state.unit+' x '+state.pets+' pet'+(state.pets>1?'s':'')+' x $'+state.rate+' + 5% service fee)'},
+              {title:'Dates',value:$('q-start').value+' to '+$('q-end').value},
+              {title:'Pets',value:String(state.pets)},
+              {title:'ZIP',value:$('q-zip').value},
+              {title:'Phone',value:$('q-phone').value},
+              {title:'Email',value:$('q-email').value||'Not provided'},
+              {title:'Match',value:'Look up the phone number in pet parent data before texting; known pet parents get greeted by name.'}
+            ]},
+            {type:'TextBlock',text:'Submitted '+new Date().toISOString()+' via yourgi.com/find-a-pro',isSubtle:true,size:'Small',wrap:true}
+          ]
+        }
+      }]
     };
-    postBookingWithRetry(payload,0);
+    return fetch(CONCIERGE_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   }
 
-  /* Transient network blips and brief Power Automate hiccups are common; retry a couple times before giving up. */
-  var WEBHOOK_RETRY_DELAYS=[1500,4000];
-  function postBookingWithRetry(payload,attempt){
-    fetch(CONCIERGE_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(res){
-      if(!res.ok){
-        if(attempt<WEBHOOK_RETRY_DELAYS.length)setTimeout(function(){postBookingWithRetry(payload,attempt+1);},WEBHOOK_RETRY_DELAYS[attempt]);
-        else console.error('Booking webhook failed after retries',res.status,payload);
-      }
-    }).catch(function(err){
-      if(attempt<WEBHOOK_RETRY_DELAYS.length)setTimeout(function(){postBookingWithRetry(payload,attempt+1);},WEBHOOK_RETRY_DELAYS[attempt]);
-      else console.error('Booking webhook error after retries',err,payload);
-    });
-  }
+  /* Inline error shown only if the post fails - injected so no Webflow designer change is needed */
+  var submitErr=document.createElement('div');
+  submitErr.style.cssText="display:none;margin-top:10px;font-weight:700;font-size:14px;text-align:center;color:#000;";
+  submitErr.textContent="That didn't send. Give it one more try.";
+  $('to-details').insertAdjacentElement('afterend',submitErr);
 
   function show(id){['step-quote','step-confirm','step-oom'].forEach(function(s){$(s).classList.add('hidden');});$(id).classList.remove('hidden');}
 
@@ -545,7 +551,7 @@
   });
 
   $('to-details').onclick=function(){
-    var ok=true, phone=$('q-phone'), zip=$('q-zip'), email=$('q-email');
+    var btn=this, ok=true, phone=$('q-phone'), zip=$('q-zip'), email=$('q-email');
     if(!validPhone(phone.value)){phone.classList.add('err');$('e-qphone').style.display='block';ok=false;}
     else{phone.classList.remove('err');$('e-qphone').style.display='none';}
     if(!/^\d{5}$/.test(zip.value)){zip.classList.add('err');$('e-zip').style.display='block';ok=false;}
@@ -554,9 +560,27 @@
     else{email.classList.remove('err');$('e-email').style.display='none';}
     if(!ok)return;
     if(!inMarket(zip.value)){show('step-oom');return;}
-    submitBooking();
-    $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+qty()+' '+state.unit+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right pro.';
-    show('step-confirm');
+
+    submitErr.style.display='none';
+    var prevText=btn.textContent;
+    btn.textContent='On it...';
+    btn.setAttribute('disabled','');
+    btn.style.pointerEvents='none';
+
+    submitBooking().then(function(r){
+      if(r&&r.ok){
+        $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+qty()+' '+state.unit+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right pro.';
+        show('step-confirm');
+      }else{
+        submitErr.style.display='block';
+      }
+    }).catch(function(){
+      submitErr.style.display='block';
+    }).finally(function(){
+      btn.textContent=prevText;
+      btn.removeAttribute('disabled');
+      btn.style.pointerEvents='';
+    });
   };
   $('restart').onclick=function(){show('step-quote');};
   $('restart2').onclick=function(){show('step-quote');};
