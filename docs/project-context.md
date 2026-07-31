@@ -19,7 +19,7 @@ Pet parents in covered markets who arrive from a Kai-run geo-targeted ad, need a
 The input describes friction on two fronts. For the business: testing the concierge/flat-rate thesis today would require a multi-week engineering build, which is too expensive for a hypothesis that might be wrong. For the customer experience being replaced: Yourgi's existing offers page is seen as beatable (Chris's read is the team could build something better than both it and Handy's page), and there's recorded skepticism that automated matching suits pet care at all — the signal is that customers want a human. One concrete failure mode was named directly: a "we'll reach out" confirmation with no stated timeframe (the car-shipping analogy) is a bad experience, so vague follow-up promises are a pain point to design against.
 
 ## 4. Proposed Solution
-- Users can land on a standalone page (e.g. `yourgi.com/find-me-a-sitter`), separate from the homepage, and state the service they want without picking a provider.
+- Users can land on a standalone page (e.g. `yourgi.com/offers/best-care-guarantee`), separate from the homepage, and state the service they want without picking a provider.
 - Users can enter service type, dates, number of pets, location/city, and required phone and email (contact info) via form fields or buttons (team's call).
 - Users can press a "Get a Price"–style button and see an instant flat-rate estimated total calculated from their inputs plus the 5% fee — before any account creation or provider browsing.
 - Users can see a coupon disclaimer stating coupons aren't valid with this flat-rate offer, and light Yourgi Guarantee messaging (with layout space reserved for Kai's web devs to expand later).

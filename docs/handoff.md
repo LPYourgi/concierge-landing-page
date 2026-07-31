@@ -1,4 +1,4 @@
-# Handoff — Concierge Landing Page ("Find me a sitter")
+# Handoff — Concierge Landing Page ("Best Care Guarantee")
 
 **For:** Rikki Mortimore · **From:** Lauren Palma · **Last updated:** 30 July 2026
 
@@ -10,7 +10,7 @@ Read this first. It's the one doc that gets you oriented; the others (`project-c
 
 A standalone, flat-rate concierge landing page — a deliberately "fake front end" (Chris's word: *Potemkin*). The visitor picks a service, gets an upfront flat price, and submits a request; a real person on the concierge team follows up by text and books it manually. There's no platform integration behind it. The whole point is a cheap test of one question: **will customers accept a flat-rate, "we'll find the pro for you" model for pet care?**
 
-Target page: something like `yourgi.com/find-me-a-sitter`, separate from the homepage. Original timeline was end of week.
+Target page: something like `yourgi.com/offers/best-care-guarantee` (renamed from `find-a-pro` on 2026-07-31), separate from the homepage. Original timeline was end of week.
 
 ## Current status
 
@@ -21,7 +21,7 @@ Interactive HTML prototype is **built, tested, and on-brand**, and the matching 
 ```
 Concierge Landing Page/
 ├── README.md                  ← folder index
-├── find-me-a-sitter.html      ← THE prototype (canonical, icon service options). Double-click to open.
+├── best-care-guarantee.html   ← THE prototype (canonical, icon service options). Double-click to open.
 ├── index.html                 ← identical copy for GitHub Pages (serves from repo root)
 ├── deploy/
 │   └── index.html             ← identical copy named index.html, ready to drop into a static host
@@ -36,7 +36,7 @@ Concierge Landing Page/
 
 ## How to open / run the prototype
 
-Double-click `find-me-a-sitter.html` — it opens in any browser, no setup. Be online the first time so the Yourgi logo and fonts load from the CDN (offline, the logo falls back to a "YOURGI" wordmark). Try it end to end: pick a service, open the **Dates** field and choose a range, adjust pets, enter a zip and phone, then **Find my pro**. Test both a covered zip (e.g. 80202) and an out-of-market one (e.g. 90210) to see both end states.
+Double-click `best-care-guarantee.html` — it opens in any browser, no setup. Be online the first time so the Yourgi logo and fonts load from the CDN (offline, the logo falls back to a "YOURGI" wordmark). Try it end to end: pick a service, open the **Dates** field and choose a range, adjust pets, enter a zip and phone, then **Find my pro**. Test both a covered zip (e.g. 80202) and an out-of-market one (e.g. 90210) to see both end states.
 
 It's a single self-contained file — all CSS and JS are inline. The logic was pressure-tested headlessly (34 checks, all passing): quote math, calendar range, zip/phone validation, and all routing.
 
@@ -62,7 +62,7 @@ It's a single self-contained file — all CSS and JS are inline. The logic was p
 
 ## How to edit
 
-- **Prototype:** open `find-me-a-sitter.html` in any code editor. It's plain HTML/CSS/JS, no build step. Keep both the `deploy/index.html` copy and the root `index.html` (GitHub Pages) in sync if you change the canonical file.
+- **Prototype:** open `best-care-guarantee.html` in any code editor. It's plain HTML/CSS/JS, no build step. Keep both the `deploy/index.html` copy and the root `index.html` (GitHub Pages) in sync if you change the canonical file.
 - **Design:** edit in the Figma file above. Ask Lauren to add you with edit access.
 - **Copy / brand:** run anything customer-facing through the `yourgi-brand` skill; keep placeholders labeled until Kai/legal confirm.
 

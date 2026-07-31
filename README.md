@@ -1,4 +1,4 @@
-# Concierge Landing Page ("Find me a sitter")
+# Concierge Landing Page ("Best Care Guarantee")
 
 A standalone flat-rate concierge landing page — visitor picks a service, gets an upfront flat price, and submits a request; concierge follows up by text and books manually. No platform integration. Tests whether customers accept a flat-rate, "we'll find the pro for you" model.
 
@@ -6,7 +6,7 @@ A standalone flat-rate concierge landing page — visitor picks a service, gets 
 
 ## Files
 
-- `find-me-a-sitter.html` — the clickable prototype (canonical, icon service options). Double-click to open.
+- `best-care-guarantee.html` — the clickable prototype (canonical, icon service options). Double-click to open. Renamed from `find-me-a-sitter.html`/`find-a-pro` (2026-07-31).
 - `deploy/index.html` — identical copy named `index.html`, ready to drop into a static host.
 - `index.html` (repo root) — identical copy for GitHub Pages, which serves from the repo root. Keep in sync with the canonical file along with `deploy/index.html`.
 - `docs/handoff.md` — start-here onboarding for a new designer.

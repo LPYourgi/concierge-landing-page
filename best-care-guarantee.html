@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Find me a sitter | Yourgi</title>
+<title>Best Care Guarantee | Yourgi</title>
 <!--
-  Concierge flat-rate landing page prototype (yourgi.com/find-me-a-sitter) — CANONICAL (icon service options).
+  Concierge flat-rate landing page prototype (yourgi.com/offers/best-care-guarantee) — CANONICAL (icon service options).
+  Renamed from find-a-pro to best-care-guarantee (2026-07-31); update the live Webflow page slug to match.
   Service icons (CloudMoon / Sun / HouseLine / Dog) and circle colors taken from Figma node 50:1700.
   PROTOTYPE NOTES:
   - Font: Oswald + Archivo stand in for National 2 (licensed) — swap in production.
   - Rates ($50 / $50 / $40 / $20) and the "within an hour, 8am-8pm" SLA are PLACEHOLDERS pending Kai.
   - Booking submissions POST to a Power Automate webhook that posts into the concierge team's Teams channel (Booking Form). No confirmation is read back (no-cors) — submission failures fail silently.
-  - Nav links, footer links, guarantee copy, and review testimonials/photos are synced from the live yourgi-pet-a5d957.webflow.io/find-a-pro build (2026-07-31).
+  - Nav links, footer links, guarantee copy, and review testimonials/photos are synced from the live yourgi-pet-a5d957.webflow.io build (2026-07-31).
 -->
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -505,7 +506,7 @@
               {title:'Email',value:$('q-email').value||'Not provided'},
               {title:'Match',value:'Look up the phone number in pet parent data before texting; known pet parents get greeted by name.'}
             ]},
-            {type:'TextBlock',text:'Submitted '+new Date().toISOString()+' via yourgi.com/find-a-pro',isSubtle:true,size:'Small',wrap:true}
+            {type:'TextBlock',text:'Submitted '+new Date().toISOString()+' via yourgi.com/offers/best-care-guarantee',isSubtle:true,size:'Small',wrap:true}
           ]
         }
       }]
