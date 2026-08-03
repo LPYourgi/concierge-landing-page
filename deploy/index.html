@@ -11,7 +11,7 @@
   PROTOTYPE NOTES:
   - Font: Oswald + Archivo stand in for National 2 (licensed) — swap in production.
   - Rates ($50 / $50 / $40 / $20) and the "within an hour, 8am-8pm" SLA are PLACEHOLDERS pending Kai.
-  - Booking submissions POST to a Power Automate webhook that posts into the concierge team's Teams channel (Booking Form). No confirmation is read back (no-cors) — submission failures fail silently.
+  - Booking submissions POST to a Power Automate webhook that posts into the concierge team's Teams channel (Booking Form), including out-of-market leads (flagged as such in the card). The response is awaited; failures show a retry prompt instead of failing silently.
   - Nav links, footer links, guarantee copy, and review testimonials/photos are synced from the live yourgi-pet-a5d957.webflow.io build (2026-07-31).
 -->
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -235,7 +235,7 @@
         <div style="display:flex; gap:12px; margin-bottom:6px;">
           <div style="flex:1;">
             <label for="q-zip">Zip code <span class="req">*</span></label>
-            <input id="q-zip" type="text" inputmode="numeric" maxlength="5" placeholder="80202" aria-required="true">
+            <input id="q-zip" type="text" inputmode="numeric" placeholder="80202" aria-required="true">
             <div class="err-msg" id="e-zip">Enter a 5-digit zip.</div>
           </div>
           <div style="flex:1;">
@@ -412,11 +412,13 @@
     var d=Math.round((new Date(e)-new Date(s))/86400000);
     return d>0?d:1;
   }
+  function unitLabel(q){return q===1?state.unit.slice(0,-1):state.unit;}
   function totalOf(){return Math.round(state.rate*qty()*state.pets*1.05);}
   function render(){
+    var q=qty();
     $('total').textContent='$'+totalOf().toLocaleString();
     $('pets-val').textContent=state.pets;
-    $('breakdown').textContent=qty()+' '+state.unit+' × '+state.pets+' pet'+(state.pets>1?'s':'')+' × $'+state.rate+' + 5% service fee';
+    $('breakdown').textContent=q+' '+unitLabel(q)+' × '+state.pets+' pet'+(state.pets>1?'s':'')+' × $'+state.rate+' + 5% service fee';
   }
   document.querySelectorAll('#svc button').forEach(function(b){
     b.addEventListener('click',function(){
@@ -459,12 +461,14 @@
     else $('q-dates').value='';
   }
   function commit(){$('q-start').value=sel.start?ymd(sel.start):'';$('q-end').value=sel.end?ymd(sel.end):'';updateField();render();}
+  var selecting=false;
   function pickDay(dt){
-    if(!sel.start||sel.end){sel.start=dt;sel.end=null;}
-    else if(dt<=sel.start){sel.start=dt;}
-    else {sel.end=dt;}
+    if(!selecting){sel.start=dt;sel.end=dt;selecting=true;}
+    else if(dt<=sel.start){sel.start=dt;sel.end=dt;}
+    else {sel.end=dt;selecting=false;}
     renderCal();
-    if(sel.start&&sel.end){commit();setTimeout(closeCal,150);} else {updateField();}
+    commit();
+    if(!selecting)setTimeout(closeCal,150);
   }
   function openCal(){if(sel.start){viewY=sel.start.getFullYear();viewM=sel.start.getMonth();}else{viewY=today.getFullYear();viewM=today.getMonth();}renderCal();$('cal').classList.remove('hidden');$('q-dates').setAttribute('aria-expanded','true');}
   function closeCal(){$('cal').classList.add('hidden');$('q-dates').setAttribute('aria-expanded','false');}
@@ -481,7 +485,7 @@
 
   /* Sends the booking request to the concierge team's Teams channel via a Power Automate webhook. */
   var CONCIERGE_WEBHOOK_URL='https://defaulta51d2d87ec284f03835d3475f2c08b.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/fc82e4f50a154976b9b63535c197f70c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ugY6yDOJ0N_viN7zGjmBeRXNt3afWyonz8aSq__WmkQ';
-  function submitBooking(){
+  function submitBooking(oom){
     var q=qty(), total=totalOf();
     var svcLabel=state.svc.charAt(0).toUpperCase()+state.svc.slice(1);
     var payload={
@@ -492,17 +496,17 @@
           '$schema':'http://adaptivecards.io/schemas/adaptive-card.json',
           type:'AdaptiveCard', version:'1.4',
           body:[
-            {type:'TextBlock',text:'NEW PRO SERVICE REQUEST',weight:'Bolder',size:'Medium'},
-            {type:'TextBlock',text:svcLabel+' in '+$('q-zip').value+' at flat rate $'+total.toLocaleString()+' - respond via SendBlue',isSubtle:true,spacing:'None',wrap:true},
+            {type:'TextBlock',text:oom?'OUT-OF-MARKET LEAD':'NEW PRO SERVICE REQUEST',weight:'Bolder',size:'Medium'},
+            {type:'TextBlock',text:svcLabel+' in '+$('q-zip').value+(oom?' — zip not yet covered':' at flat rate $'+total.toLocaleString()+' - respond via SendBlue'),isSubtle:true,spacing:'None',wrap:true},
             {type:'FactSet',facts:[
               {title:'Service',value:svcLabel},
-              {title:'Quoted',value:'$'+total.toLocaleString()+' ('+q+' '+state.unit+' x '+state.pets+' pet'+(state.pets>1?'s':'')+' x $'+state.rate+' + 5% service fee)'},
+              {title:'Quoted',value:'$'+total.toLocaleString()+' ('+q+' '+unitLabel(q)+' x '+state.pets+' pet'+(state.pets>1?'s':'')+' x $'+state.rate+' + 5% service fee)'},
               {title:'Dates',value:$('q-start').value+' to '+$('q-end').value},
               {title:'Pets',value:String(state.pets)},
               {title:'ZIP',value:$('q-zip').value},
               {title:'Phone',value:$('q-phone').value},
               {title:'Email',value:$('q-email').value||'Not provided'},
-              {title:'Match',value:'Look up the phone number in pet parent data before texting; known pet parents get greeted by name.'}
+              {title:'Match',value:oom?'Zip is outside current coverage — log as a future-interest lead, do not attempt to book.':'Look up the phone number in pet parent data before texting; known pet parents get greeted by name.'}
             ]},
             {type:'TextBlock',text:'Submitted '+new Date().toISOString()+' via yourgi.com/book/best-care-guarantee',isSubtle:true,size:'Small',wrap:true}
           ]
@@ -558,7 +562,7 @@
     if(!validEmail(email.value)){email.classList.add('err');$('e-email').style.display='block';ok=false;}
     else{email.classList.remove('err');$('e-email').style.display='none';}
     if(!ok)return;
-    if(!inMarket(zip.value)){show('step-oom');return;}
+    var oom=!inMarket(zip.value);
 
     submitErr.style.display='none';
     var prevText=btn.textContent;
@@ -566,10 +570,15 @@
     btn.setAttribute('disabled','');
     btn.style.pointerEvents='none';
 
-    submitBooking().then(function(r){
+    submitBooking(oom).then(function(r){
       if(r&&r.ok){
-        $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+qty()+' '+state.unit+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right pro.';
-        show('step-confirm');
+        if(oom){
+          show('step-oom');
+        }else{
+          var q=qty();
+          $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+q+' '+unitLabel(q)+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right pro.';
+          show('step-confirm');
+        }
       }else{
         submitErr.style.display='block';
       }

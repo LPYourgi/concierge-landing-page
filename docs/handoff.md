@@ -57,7 +57,7 @@ It's a single self-contained file — all CSS and JS are inline. The logic was p
 | 2 | Customer response-time commitment (prototype shows a placeholder "within an hour, 8am–8pm MT") | Chris → Kai |
 | 3 | Yourgi Guarantee wording — legal boundaries undocumented; current copy is light and flagged | Legal / Kai |
 | 4 | Where form submissions land — wired to Power Automate → Teams channel as of 2026-07-30 (Jeff's suggested option, simplest); still needs Kai's sign-off as the permanent destination. Note: the webhook URL is hardcoded client-side and unauthenticated — anyone who views source can POST to it, so this should be revisited before the page carries real ad traffic | Kai / Jeff |
-| 5 | Phone-only contact (email was removed) — confirm a mistyped phone with no email backup is acceptable | Lauren / Kai |
+| 5 | ~~Phone-only contact (email was removed)~~ — resolved: email was re-added as a required field alongside phone | Lauren |
 | 6 | National 2 font + official logo lockup — prototype uses Oswald/Archivo stand-ins and the CDN logo | Webflow team / brand |
 
 ## How to edit
