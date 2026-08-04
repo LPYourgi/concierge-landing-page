@@ -70,6 +70,11 @@
   .nav-right{display:flex; align-items:center; gap:14px;}
   .nav-right .book{background:var(--yellow); color:var(--black); padding:10px 22px; border-radius:8px; font-family:'Oswald',sans-serif; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:.02em; text-decoration:none;}
   .nav-more{width:36px; height:36px; border-radius:50%; border:1.5px solid var(--black); background:var(--yellow); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; letter-spacing:1px; flex:0 0 auto;}
+  .nav-more-wrap{position:relative;}
+  .nav-more-menu{position:absolute; top:44px; right:0; background:var(--bone); border:1px solid var(--line); border-radius:10px; box-shadow:0 12px 28px rgba(0,0,0,.14); padding:8px; display:none; flex-direction:column; min-width:190px; z-index:50;}
+  .nav-more-menu.open{display:flex;}
+  .nav-more-menu a{padding:10px 12px; border-radius:6px; font-family:'Oswald',sans-serif; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.02em; text-decoration:none; color:var(--black);}
+  .nav-more-menu a:hover{background:var(--yellow);}
   /* hero */
   .hero{background:var(--yellow);}
   .hero .wrap{display:grid; grid-template-columns:1.05fr .95fr; gap:32px; padding:48px 20px; align-items:center;}
@@ -150,6 +155,7 @@
     .polaroid-wrap{max-width:260px; margin:0 auto 12px;}
     .reviews{grid-template-columns:1fr;}
     .other-svc-photos{position:static; margin-bottom:20px;}
+    .other-svc-list{flex-direction:column; gap:16px;}
     .foot-grid{grid-template-columns:1fr 1fr;}
     .navlinks .hide-sm{display:none;}
   }
@@ -170,7 +176,15 @@
     </div>
     <div class="nav-right">
       <a class="book" href="https://www.yourgi.com/app/search">Book now</a>
-      <button type="button" class="nav-more" aria-label="More">&hellip;</button>
+      <div class="nav-more-wrap">
+        <button type="button" class="nav-more" id="nav-more-btn" aria-label="More" aria-haspopup="true" aria-expanded="false">&hellip;</button>
+        <div class="nav-more-menu" id="nav-more-menu">
+          <a href="https://www.yourgi.com/about">About</a>
+          <a href="https://www.yourgi.com/rewards">Rewards</a>
+          <a href="https://www.yourgi.com/book/best-care-guarantee">Yourgi Guarantee</a>
+          <a href="https://www.yourgi.com/sign-up">Become a Provider</a>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -178,8 +192,9 @@
 <header class="hero">
   <div class="wrap">
     <div>
-      <h1>One flat price.<br>We find the pro.</h1>
-      <p class="lede">Boarding &amp; house sitting <strong>$50/night</strong>, daycare <strong>$40/day</strong>, walks <strong>$20</strong>. No scrolling, no surprises — tell us what your pet needs and a real person reaches out.</p>
+      <h1>ALL YOUR PET'S NEEDS, COVERED.<br>ONE FLAT PRICE.</h1>
+      <p class="lede">Tell us your pet care needs and our Yourgi Concierge (a real human) will send 3 hand picked, highly recommended, local, and guaranteed* Pet Care Providers.</p>
+      <p class="lede">No scrolling, no guessing, no surprises — just honest personalized pet care with a human touch.</p>
     </div>
 
     <div id="quote" class="card">
@@ -258,14 +273,14 @@
 
         <button class="btn-dark" style="width:100%;" id="to-details">Find my pro</button>
         <p class="fineprint" style="text-align:center; margin-top:8px;">Coupons don't apply to this flat-rate offer.</p>
-        <p class="fineprint" style="text-align:center; margin-top:4px;">By submitting your phone's number and email, you agree to receive text messages and emails from Yourgi about the services.<br>Message and data rates may apply.</p>
+        <p class="fineprint" style="text-align:center; margin-top:4px;">By submitting your phone number and email, you agree to receive text messages and emails from Yourgi about the services.<br>Message and data rates may apply.</p>
       </div>
 
       <!-- STEP 2a: confirmation -->
       <div id="step-confirm" class="hidden" style="text-align:center; padding:10px 4px;">
         <div class="display" style="font-size:26px;">Got it — we're on it.</div>
-        <p id="confirm-body" style="font-size:15px; margin:12px auto 0; max-width:340px;">A real person will text you to lock in your booking and match you with the right pro.</p>
-        <p class="fineprint" style="margin-top:12px;">Usually within an hour, 8am–8pm MT. Sent overnight? You'll hear from us first thing.</p>
+        <p id="confirm-body" style="font-size:15px; margin:12px auto 0; max-width:340px;">A real person will text you to lock in your booking and match you with the right provider.</p>
+        <p class="fineprint" style="margin-top:12px;">We'll respond within an hour, 8am-8pm MT. Sent overnight? You'll hear from us first thing tomorrow.</p>
         <button class="btn-dark" style="margin-top:18px;" id="restart">Start another request</button>
       </div>
 
@@ -410,6 +425,7 @@
     var s=$('q-start').value, e=$('q-end').value;
     if(!s||!e) return 1;
     var d=Math.round((new Date(e)-new Date(s))/86400000);
+    if(state.unit!=='nights') d+=1;
     return d>0?d:1;
   }
   function unitLabel(q){return q===1?state.unit.slice(0,-1):state.unit;}
@@ -429,6 +445,20 @@
   });
   $('pminus').onclick=function(){if(state.pets>1){state.pets--;render();}};
   $('pplus').onclick=function(){if(state.pets<8){state.pets++;render();}};
+
+  var navMoreBtn=$('nav-more-btn'), navMoreMenu=$('nav-more-menu');
+  function closeNavMore(){navMoreMenu.classList.remove('open'); navMoreBtn.setAttribute('aria-expanded','false');}
+  navMoreBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=navMoreMenu.classList.toggle('open');
+    navMoreBtn.setAttribute('aria-expanded',open?'true':'false');
+  });
+  document.addEventListener('click',function(e){
+    if(!navMoreMenu.contains(e.target) && e.target!==navMoreBtn) closeNavMore();
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape') closeNavMore();
+  });
 
   /* --- single-field range calendar (matches Yourgi's "Select your dates") --- */
   var sel={start:null,end:null}, viewY, viewM;
@@ -576,7 +606,7 @@
           show('step-oom');
         }else{
           var q=qty();
-          $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+q+' '+unitLabel(q)+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right pro.';
+          $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+q+' '+unitLabel(q)+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right provider.';
           show('step-confirm');
         }
       }else{
