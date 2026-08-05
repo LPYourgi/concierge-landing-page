@@ -458,7 +458,6 @@
       document.querySelectorAll('#svc button').forEach(function(x){x.setAttribute('aria-pressed','false');});
       b.setAttribute('aria-pressed','true');
       state.rate=+b.dataset.r; state.unit=b.dataset.u; state.svc=b.dataset.s; render();
-      trackEvent('Service Selected',{service:state.svc});
     });
   });
   $('pminus').onclick=function(){if(state.pets>1){state.pets--;render();}};
@@ -530,8 +529,10 @@
   $('cal-next').onclick=function(e){e.stopPropagation();viewM++;if(viewM>11){viewM=0;viewY++;}renderCal();};
   sel.start=new Date(today); sel.end=new Date(today); commit();
 
-  var MARKETS=['80','75','76','77','021','022','970','971','972'];
-  function inMarket(zip){return MARKETS.some(function(p){return zip.indexOf(p)===0;});}
+  /* In-market = zip falls within CO, ME, MA, NH, OR, TX, or WA (3-digit zip prefix ranges) */
+  var MARKET_RANGES=[[10,27],[30,38],[39,49],[750,799],[800,816],[970,979],[980,994]];
+  var MARKET_ZIPS=[733,885];
+  function inMarket(zip){var p=+zip.slice(0,3);return MARKET_ZIPS.indexOf(p)>-1||MARKET_RANGES.some(function(r){return p>=r[0]&&p<=r[1];});}
 
   /* Sends the booking request to the concierge team's Teams channel via a Power Automate webhook. */
   var CONCIERGE_WEBHOOK_URL='https://defaulta51d2d87ec284f03835d3475f2c08b.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/fc82e4f50a154976b9b63535c197f70c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ugY6yDOJ0N_viN7zGjmBeRXNt3afWyonz8aSq__WmkQ';
@@ -605,7 +606,7 @@
 
   $('to-details').onclick=function(){
     var btn=this, ok=true, phone=$('q-phone'), zip=$('q-zip'), email=$('q-email'), badFields=[];
-    trackEvent('Find My Pro Clicked',{service:state.svc});
+    trackEvent('Find My Pro Clicked',{service_type:state.svc});
     if(!validPhone(phone.value)){phone.classList.add('err');$('e-qphone').style.display='block';ok=false;badFields.push('phone');}
     else{phone.classList.remove('err');$('e-qphone').style.display='none';}
     if(!/^\d{5}$/.test(zip.value)){zip.classList.add('err');$('e-zip').style.display='block';ok=false;badFields.push('zip');}
@@ -624,20 +625,20 @@
     submitBooking(oom).then(function(r){
       if(r&&r.ok){
         if(oom){
-          trackEvent('Out-of-Market Lead Captured',{service:state.svc,zip:zip.value});
+          trackEvent('Out-of-Market Lead Captured',{service_type:state.svc,book_zip_code:zip.value});
           show('step-oom');
         }else{
           var q=qty();
           $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+q+' '+unitLabel(q)+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right provider.';
-          trackEvent('Booking Confirmed',{service:state.svc,pets:state.pets,zip:zip.value,total:totalOf()});
+          trackEvent('sent_flat_rate_request',{service_type:state.svc,pet_count:state.pets,book_zip_code:zip.value,estimated_total:totalOf(),start_date:$('q-start').value,end_date:$('q-end').value,parent_phone:phone.value,email:email.value});
           show('step-confirm');
         }
       }else{
-        trackEvent('Submission Failed',{service:state.svc,reason:'response_not_ok'});
+        trackEvent('Submission Failed',{service_type:state.svc,reason:'response_not_ok'});
         submitErr.style.display='block';
       }
     }).catch(function(){
-      trackEvent('Submission Failed',{service:state.svc,reason:'network_error'});
+      trackEvent('Submission Failed',{service_type:state.svc,reason:'network_error'});
       submitErr.style.display='block';
     }).finally(function(){
       btn.textContent=prevText;
