@@ -160,6 +160,23 @@
     .navlinks .hide-sm{display:none;}
   }
 </style>
+<!-- Mixpanel: uses the site-wide default instance already initialized in Webflow's site footer
+     custom code (same project token, cross-page UTM/referrer attribution). The fallback loader
+     below only runs for standalone/local preview, where no site-wide script has executed. -->
+<script type="text/javascript">
+    if (typeof mixpanel === 'undefined' || !mixpanel.track) {
+      (function (f, b) { if (!b.__SV) { var e, g, i, h; window.mixpanel = b; b._i = []; b.init = function (e, f, c) { function g(a, d) { var b = d.split("."); 2 == b.length && ((a = a[b[0]]), (d = b[1])); a[d] = function () { a.push([d].concat(Array.prototype.slice.call(arguments, 0))); }; } var a = b; "undefined" !== typeof c ? (a = b[c] = []) : (c = "mixpanel"); a.people = a.people || []; a.toString = function (a) { var d = "mixpanel"; "mixpanel" !== c && (d += "." + c); a || (d += " (stub)"); return d; }; a.people.toString = function () { return a.toString(1) + ".people (stub)"; }; i = "disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split( " "); for (h = 0; h < i.length; h++) g(a, i[h]); var j = "set set_once union unset remove delete".split(" "); a.get_group = function () { function b(c) { d[c] = function () { call2_args = arguments; call2 = [c].concat(Array.prototype.slice.call(call2_args, 0)); a.push([e, call2]); }; } for ( var d = {}, e = ["get_group"].concat( Array.prototype.slice.call(arguments, 0)), c = 0; c < j.length; c++) b(j[c]); return d; }; b._i.push([e, f, c]); }; b.__SV = 1.2; e = f.createElement("script"); e.type = "text/javascript"; e.async = !0; e.src = "undefined" !== typeof MIXPANEL_CUSTOM_LIB_URL ? MIXPANEL_CUSTOM_LIB_URL : "file:" === f.location.protocol && "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//) ? "https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js" : "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"; g = f.getElementsByTagName("script")[0]; g.parentNode.insertBefore(e, g); } })(document, window.mixpanel || []);
+      mixpanel.init("1542ee4c0da2b70cf4a08e465a14d3d1", {track_pageview: true});
+    }
+
+    var mpIsBot = /bot|crawl|spider|headless/i.test(navigator.userAgent);
+    var mpIsTestMode = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+    var mpDeviceType = window.innerWidth < 768 ? 'mobile' : 'desktop';
+    function trackEvent(name, props) {
+      if (mpIsBot) return;
+      mixpanel.track(name, Object.assign({test_mode: mpIsTestMode, device_type: mpDeviceType}, props || {}));
+    }
+</script>
 </head>
 <body>
 
@@ -271,7 +288,7 @@
         </div>
         <p class="fineprint" id="breakdown" style="margin:-8px 0 26px;">2 nights × 2 pets × $50 + 5% service fee</p>
 
-        <button class="btn-dark" style="width:100%;" id="to-details">Find my pro</button>
+        <button class="btn-dark" style="width:100%;" id="to-details">Send recommendations</button>
         <p class="fineprint" style="text-align:center; margin-top:8px;">Coupons don't apply to this flat-rate offer.</p>
         <p class="fineprint" style="text-align:center; margin-top:4px;">By submitting your phone number and email, you agree to receive text messages and emails from Yourgi about the services.<br>Message and data rates may apply.</p>
       </div>
@@ -441,24 +458,27 @@
       document.querySelectorAll('#svc button').forEach(function(x){x.setAttribute('aria-pressed','false');});
       b.setAttribute('aria-pressed','true');
       state.rate=+b.dataset.r; state.unit=b.dataset.u; state.svc=b.dataset.s; render();
+      trackEvent('Service Selected',{service:state.svc});
     });
   });
   $('pminus').onclick=function(){if(state.pets>1){state.pets--;render();}};
   $('pplus').onclick=function(){if(state.pets<8){state.pets++;render();}};
 
   var navMoreBtn=$('nav-more-btn'), navMoreMenu=$('nav-more-menu');
-  function closeNavMore(){navMoreMenu.classList.remove('open'); navMoreBtn.setAttribute('aria-expanded','false');}
-  navMoreBtn.addEventListener('click',function(e){
-    e.stopPropagation();
-    var open=navMoreMenu.classList.toggle('open');
-    navMoreBtn.setAttribute('aria-expanded',open?'true':'false');
-  });
-  document.addEventListener('click',function(e){
-    if(!navMoreMenu.contains(e.target) && e.target!==navMoreBtn) closeNavMore();
-  });
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape') closeNavMore();
-  });
+  if(navMoreBtn && navMoreMenu){
+    function closeNavMore(){navMoreMenu.classList.remove('open'); navMoreBtn.setAttribute('aria-expanded','false');}
+    navMoreBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var open=navMoreMenu.classList.toggle('open');
+      navMoreBtn.setAttribute('aria-expanded',open?'true':'false');
+    });
+    document.addEventListener('click',function(e){
+      if(!navMoreMenu.contains(e.target) && e.target!==navMoreBtn) closeNavMore();
+    });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape') closeNavMore();
+    });
+  }
 
   /* --- single-field range calendar (matches Yourgi's "Select your dates") --- */
   var sel={start:null,end:null}, viewY, viewM;
@@ -584,14 +604,15 @@
   });
 
   $('to-details').onclick=function(){
-    var btn=this, ok=true, phone=$('q-phone'), zip=$('q-zip'), email=$('q-email');
-    if(!validPhone(phone.value)){phone.classList.add('err');$('e-qphone').style.display='block';ok=false;}
+    var btn=this, ok=true, phone=$('q-phone'), zip=$('q-zip'), email=$('q-email'), badFields=[];
+    trackEvent('Find My Pro Clicked',{service:state.svc});
+    if(!validPhone(phone.value)){phone.classList.add('err');$('e-qphone').style.display='block';ok=false;badFields.push('phone');}
     else{phone.classList.remove('err');$('e-qphone').style.display='none';}
-    if(!/^\d{5}$/.test(zip.value)){zip.classList.add('err');$('e-zip').style.display='block';ok=false;}
+    if(!/^\d{5}$/.test(zip.value)){zip.classList.add('err');$('e-zip').style.display='block';ok=false;badFields.push('zip');}
     else{zip.classList.remove('err');$('e-zip').style.display='none';}
-    if(!validEmail(email.value)){email.classList.add('err');$('e-email').style.display='block';ok=false;}
+    if(!validEmail(email.value)){email.classList.add('err');$('e-email').style.display='block';ok=false;badFields.push('email');}
     else{email.classList.remove('err');$('e-email').style.display='none';}
-    if(!ok)return;
+    if(!ok){trackEvent('Validation Failed',{fields:badFields});return;}
     var oom=!inMarket(zip.value);
 
     submitErr.style.display='none';
@@ -603,16 +624,20 @@
     submitBooking(oom).then(function(r){
       if(r&&r.ok){
         if(oom){
+          trackEvent('Out-of-Market Lead Captured',{service:state.svc,zip:zip.value});
           show('step-oom');
         }else{
           var q=qty();
           $('confirm-body').textContent='A real person will text you to lock in your '+state.svc+' ('+q+' '+unitLabel(q)+', '+state.pets+' pet'+(state.pets>1?'s':'')+', about $'+totalOf().toLocaleString()+') and match you with the right provider.';
+          trackEvent('Booking Confirmed',{service:state.svc,pets:state.pets,zip:zip.value,total:totalOf()});
           show('step-confirm');
         }
       }else{
+        trackEvent('Submission Failed',{service:state.svc,reason:'response_not_ok'});
         submitErr.style.display='block';
       }
     }).catch(function(){
+      trackEvent('Submission Failed',{service:state.svc,reason:'network_error'});
       submitErr.style.display='block';
     }).finally(function(){
       btn.textContent=prevText;
@@ -634,8 +659,22 @@
     $('e-email').style.display='none';
     render();
   }
-  $('restart').onclick=function(){resetForm();show('step-quote');};
-  $('restart2').onclick=function(){resetForm();show('step-quote');};
+  $('restart').onclick=function(){trackEvent('Form Restarted');resetForm();show('step-quote');};
+  $('restart2').onclick=function(){trackEvent('Form Restarted');resetForm();show('step-quote');};
+
+  var scrollFired={}, scrollTicking=false;
+  function checkScrollDepth(){
+    var docHeight=Math.max(document.documentElement.scrollHeight-window.innerHeight,1);
+    var pct=Math.min(100,Math.round((window.scrollY/docHeight)*100));
+    [25,50,75,100].forEach(function(t){
+      if(pct>=t && !scrollFired[t]){scrollFired[t]=true;trackEvent('Scroll Depth',{percent:t});}
+    });
+    scrollTicking=false;
+  }
+  window.addEventListener('scroll',function(){
+    if(!scrollTicking){scrollTicking=true;setTimeout(checkScrollDepth,150);}
+  },{passive:true});
+
   render();
 })();
 </script>
