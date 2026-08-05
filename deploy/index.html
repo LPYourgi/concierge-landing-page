@@ -177,6 +177,18 @@
       mixpanel.track(name, Object.assign({test_mode: mpIsTestMode, device_type: mpDeviceType}, props || {}));
     }
 </script>
+<!-- Segment: same write key/source used on the offer pages, so booking-form emails land in the same place. -->
+<script>
+  !function(){var i="analytics",analytics=window[i]=window[i]||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","screen","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware","register"];analytics.factory=function(e){return function(){if(window[i].initialized)return window[i][e].apply(window[i],arguments);var n=Array.prototype.slice.call(arguments);if(["track","screen","alias","group","page","identify"].indexOf(e)>-1){var c=document.querySelector("link[rel='canonical']");n.push({__t:"bpc",c:c&&c.getAttribute("href")||void 0,p:location.pathname,u:location.href,s:location.search,t:document.title,r:document.referrer})}n.unshift(e);analytics.push(n);return analytics}};for(var n=0;n<analytics.methods.length;n++){var key=analytics.methods[n];analytics[key]=analytics.factory(key)}analytics.load=function(key,n){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.setAttribute("data-global-segment-analytics-key",i);t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(t,r);analytics._loadOptions=n;analytics._writeKey=key};analytics.SNIPPET_VERSION="5.2.0";
+  analytics.load("kLX6HrP3flHzNRYoyc3meXS5WhGu5N2Z");
+  // INTENTIONALLY OMITTED: analytics.page(); — Mixpanel already tracks pageviews on this page.
+  }}();
+  function sendToSegment(email, traits, eventName, props){
+    if (!window.analytics || !window.analytics.identify) return;
+    window.analytics.identify(email, traits);
+    window.analytics.track(eventName, props);
+  }
+</script>
 </head>
 <body>
 
@@ -624,6 +636,8 @@
 
     submitBooking(oom).then(function(r){
       if(r&&r.ok){
+        var segTraits={email:email.value,phone:phone.value,zip:zip.value,source:'webflow_marketing_site',form_type:'concierge_landing_page'};
+        sendToSegment(email.value,segTraits,'Lead Captured',Object.assign({},segTraits,{service_type:state.svc,pet_count:state.pets,estimated_total:totalOf(),start_date:$('q-start').value,end_date:$('q-end').value,out_of_market:oom}));
         if(oom){
           trackEvent('Out-of-Market Lead Captured',{service_type:state.svc,book_zip_code:zip.value});
           show('step-oom');
